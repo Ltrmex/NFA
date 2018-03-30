@@ -1,3 +1,16 @@
+/* 
+Explanation: In computer science, the shunting-yard algorithm is a method for parsing mathematical expressions 
+			specified in infix notation. It can produce either a postfix notation string. The shunting yard algorithm is stack-based. 
+			Infix expressions are the form of mathematical notation most people are used to, for instance "3 + 4" or "3 + 4 × (2 − 1)". 
+			For the conversion there are two text variables (strings), the input and the output. There is also a stack that holds operators 
+			not yet added to the output queue. To convert, the program reads each symbol in order and does something based on that symbol. The 
+			result for the above examples would be "3 4 +" or "3 4 2 1 − × +". The shunting-yard algorithm was later generalized into operator-precedence parsing.
+Explanation Source: Wikipedia
+
+Code Reference: https://web.microsoftstream.com/video/9d83a3f3-bc4f-4bda-95cc-b21c8e67675e
+Note: Code was implemented through the use of the above tutorial
+*/
+
 package main
 
 //	Imports

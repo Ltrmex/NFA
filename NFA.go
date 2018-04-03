@@ -10,8 +10,8 @@ type state struct {
     symbol rune //  instead of labeling the arrows
 
     //  Pointers to other states
-    edge1 *state    //  arrow one
-    edge2 *state    //  arrow two
+    edgeOne *state    //  arrow one
+    edgeTwo *state    //  arrow two
 }   //  state
 
 //  Thompson's construction - for each fragment there is one initial state and one accept state
@@ -23,7 +23,31 @@ type nfa struct {
 
 //  Postfix regular expression to non deterministic finite automaton
 func ConvertToNFA(pofix string) *nfa {
+    //  Thompson's construction work on a stack to keep a track of fragments of nfa's on a stack
+    nfaStack := []*nfa{}
 
+    //  Loop through postfix regular expression, rune at a time
+    for _, r := pofix {
+        switch r {
+            case '.':
+                //  Pop two thing off nfa stack - two pointers to nfa fragments
+                fragmentTwo := nfaStack[len(nfaStack) - 1]  //  last stack
+                nfaStack = nfaStack[:len(nfaStack) - 1] //  //  get rid off last thing thats on the stack
+
+                fragmentOne := nfaStack[len(nfaStack) - 1]  //  last stack
+                nfaStack = nfaStack[:len(nfaStack) - 1] //  //  get rid off last thing thats on the stack
+                
+                //  Join two fragments together and then push concatenated fragment back to nfa stack
+                fragmentOne.accept.edgeOne = fragmentTwo.initial    //  first edge of the accept state point to edge two of initial state
+                
+                nfaStack = append(nfaStack, &nfa{initial: fragmentOne.initial, accept: fragmentTwo.accept}) //  append instance of address of nfa structs
+            case '|':
+            case '*':
+            default:
+        }   //  switch
+    }   //  for
+
+    return nfastack[0]
 }   //  poregtonfa()
 
 //  Main

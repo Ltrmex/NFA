@@ -80,11 +80,55 @@ func ConvertToNFA(pofix string) *nfa {
         }   //  switch
     }   //  for
 
+    if len(nfaStack) != 1 {
+        fmt.Println("Uh oh: ", len(nfaStack), nfaStack)
+    }   //  if
+
     return nfaStack[0]
 }   //  poregtonfa()
+
+func AddState(l []*state, s *state, a *state) {
+
+}   //  AddState()
+
+//  Check if regular expression matched a string
+func PoMatch(po string, s string) bool {
+    isMatch := false    //  set to false
+    poNFA := ConvertToNFA(po)
+
+    //  Track of states
+    current := []*state{}   //  track of current states
+    next := []*state{}  //  where current state can get to
+
+    current = AddState(current[:], poNFA.initial, poNFA.accept)
+
+    //  Generate next from current by looping each rune and check current state
+    for _, r := range s {
+        for _, c := range current {
+            if c.symbol == r {
+                next = AddState(next[:], s.edgeOne, poNFA.accept)
+            }   //  if
+        }   //  inner for
+
+        current = next  //  current is the next set of states
+        next = []*state{}   //  reset value of next to empty
+    }   //  for
+
+    //  Check if any of states are the accept state
+    for _, c := range current {
+        if c == poNFA.accept {
+            isMatch = true
+            break;
+        }
+
+    }   //  for
+    return isMatch
+}   //  pomatch()
 
 //  Main
 func main() {
     nfa := ConvertToNFA("ab.c*|")
     fmt.Println(nfa)
+
+    fmt.Println(PoMatch("ab.c*|", "cccc"))
 }   //  main()

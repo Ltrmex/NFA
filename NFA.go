@@ -1,3 +1,8 @@
+/* 
+Code Reference: https://web.microsoftstream.com/video/68a288f5-4688-4b3a-980e-1fcd5dd2a53b
+                https://web.microsoftstream.com/video/bad665ee-3417-4350-9d31-6db35cf5f80d
+Note: Code was implemented through the use of the above tutorial
+*/
 package main
 
 //	Imports
@@ -72,6 +77,28 @@ func ConvertToNFA(pofix string) *nfa {
                 fragment.accept.edgeTwo = &accept
 
                 nfaStack = append(nfaStack, &nfa{initial: &initial, accept: &accept})   //   push new stack
+            case '?':
+                //  Pop one thing off nfa stack
+                fragment := nfaStack[len(nfaStack) - 1] //  last stack
+                nfaStack = nfaStack[:len(nfaStack) - 1] //  get rid off last thing thats on the stack
+
+                //  Create new initial state, then join the state to the fragments
+                initial := state{edgeOne: fragment.initial, edgeTwo: fragment.accept}
+
+                nfaStack = append(nfaStack, &nfa{initial: &initial, accept: fragment.accept})   //   push new stack
+            case '+':
+                //  Pop one thing off nfa stack
+                fragment := nfaStack[len(nfaStack) - 1] //  last stack
+                nfaStack = nfaStack[:len(nfaStack) - 1] //  get rid off last thing thats on the stack
+
+                //  Create new initial state and accept state, then join the states to the fragments
+                accept := state{}
+                initial := state{edgeOne: fragment.initial, edgeTwo: &accept}
+                
+                //  Joins all the arrows in the correct way - pass new points
+                fragment.accept.edgeOne = &initial
+
+                nfaStack = append(nfaStack, &nfa{initial: fragment.initial, accept: &accept})   //   push new stack
             default:
                 accept := state{}
                 initial := state{symbol: r, edgeOne: &accept}
@@ -87,8 +114,20 @@ func ConvertToNFA(pofix string) *nfa {
     return nfaStack[0]
 }   //  poregtonfa()
 
-func AddState(l []*state, s *state, a *state) {
+//  Helper function - find all states
+func AddState(l []*state, s *state, a *state) []*state {
+    l = append(l, s)    //  append s state to l
+    
+    //  Check s if there's e arrows going from it
+    if s != a && s.symbol == 0 {
+        l = AddState(l, s.edgeOne, a)   //  follow the first edge
 
+        if s.edgeTwo != nil {   //  check if there's a second edge
+            l = AddState(l, s.edgeTwo, a)   //  follow the second edge
+        }   //  inner if
+    }   //  if
+
+    return l
 }   //  AddState()
 
 //  Check if regular expression matched a string
@@ -104,9 +143,9 @@ func PoMatch(po string, s string) bool {
 
     //  Generate next from current by looping each rune and check current state
     for _, r := range s {
-        for _, c := range current {
-            if c.symbol == r {
-                next = AddState(next[:], s.edgeOne, poNFA.accept)
+        for _, c := range current { //  loop through each state
+            if c.symbol == r {  //  check if set to r
+                next = AddState(next[:], c.edgeOne, poNFA.accept)
             }   //  if
         }   //  inner for
 
@@ -130,5 +169,5 @@ func main() {
     nfa := ConvertToNFA("ab.c*|")
     fmt.Println(nfa)
 
-    fmt.Println(PoMatch("ab.c*|", "cccc"))
+    fmt.Println(PoMatch("ab.c*|", "ab"))
 }   //  main()

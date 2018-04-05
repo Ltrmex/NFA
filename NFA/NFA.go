@@ -1,10 +1,11 @@
 /* 
 Code Reference: https://web.microsoftstream.com/video/68a288f5-4688-4b3a-980e-1fcd5dd2a53b
                 https://web.microsoftstream.com/video/bad665ee-3417-4350-9d31-6db35cf5f80d
+                https://swtch.com/~rsc/regexp/regexp1.html
 Note: Code was implemented through the use of the above tutorial
 */
-package main
 
+package NFA
 //	Imports
 import (
 	"fmt"
@@ -164,6 +165,7 @@ func PoMatch(po string, s string) bool {
     return isMatch
 }   //  pomatch()
 
+/*
 //  Main
 func main() {
     nfa := ConvertToNFA("ab.c*|")
@@ -171,3 +173,4 @@ func main() {
 
     fmt.Println(PoMatch("ab.c*|", "ab"))
 }   //  main()
+*/

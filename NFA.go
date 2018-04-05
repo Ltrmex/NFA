@@ -27,7 +27,7 @@ func ConvertToNFA(pofix string) *nfa {
     nfaStack := []*nfa{}
 
     //  Loop through postfix regular expression, rune at a time
-    for _, r := pofix {
+    for _, r := range pofix {
         switch r {
             case '.':
                 //  Pop two thing off nfa stack - two pointers to nfa fragments
@@ -42,12 +42,45 @@ func ConvertToNFA(pofix string) *nfa {
                 
                 nfaStack = append(nfaStack, &nfa{initial: fragmentOne.initial, accept: fragmentTwo.accept}) //  append instance of address of nfa structs
             case '|':
+                //  Pop two thing off nfa stack - two pointers to nfa fragments
+                fragmentTwo := nfaStack[len(nfaStack) - 1]  //  last stack
+                nfaStack = nfaStack[:len(nfaStack) - 1] //  //  get rid off last thing thats on the stack
+
+                fragmentOne := nfaStack[len(nfaStack) - 1]  //  last stack
+                nfaStack = nfaStack[:len(nfaStack) - 1] //  //  get rid off last thing thats on the stack
+                
+                //  Create new initial state and accept state, then join the states to the fragments
+                accept := state{}
+                initial := state{edgeOne: fragmentOne.initial, edgeTwo: fragmentTwo.initial}
+
+                //  Joins all the arrows in the correct way - pass new points
+                fragmentOne.accept.edgeOne = &accept
+                fragmentTwo.accept.edgeOne = &accept
+                
+                nfaStack = append(nfaStack, &nfa{initial: &initial, accept: &accept})   //   push new stack
             case '*':
+                //  Pop one thing off nfa stack
+                fragment := nfaStack[len(nfaStack) - 1]  //  last stack
+                nfaStack = nfaStack[:len(nfaStack) - 1] //  //  get rid off last thing thats on the stack
+
+                //  Create new initial state and accept state, then join the states to the fragments
+                accept := state{}
+                initial := state{edgeOne: fragment.initial ,edgeTwo: &accept}
+
+                //  Joins all the arrows in the correct way - pass new points
+                fragment.accept.edgeOne = fragment.initial
+                fragment.accept.edgeTwo = &accept
+
+                nfaStack = append(nfaStack, &nfa{initial: &initial, accept: &accept})   //   push new stack
             default:
+                accept := state{}
+                initial := state{symbol: r, edgeOne: &accept}
+
+                nfaStack = append(nfaStack, &nfa{initial: &initial, accept: &accept})   //   push new stack
         }   //  switch
     }   //  for
 
-    return nfastack[0]
+    return nfaStack[0]
 }   //  poregtonfa()
 
 //  Main
